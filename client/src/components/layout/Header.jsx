@@ -1,32 +1,35 @@
 import React from 'react';
 import './Header.css';
 
-const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
-
 export function Header() {
   return (
     <>
-      <div className="tricolor-bar">
-        <div className="saffron" />
-        <div className="white" />
-        <div className="green" />
-      </div>
-
-      <header className="main-header">
-        <div className="header-top">
-          {/* <div className="header-emblem">🇮🇳</div> */}
-          <div className="header-date">{today}</div>
-          {/* <div className="header-badge">Google Antigravity 2025</div> */}
-        </div>
-
-        <div className="header-content">
-          <div className="chakra-deco">⊙</div>
-          <div className="header-eyebrow">भारत निर्वाचन आयोग · Civic Education Platform</div>
-          <div className="header-title">
-            <span className="mata">Mat</span><span className="data">Mitra</span>
+      <a href="#main-content" className="sr-only skip-link">Skip to main content</a>
+      <header className="header-glass" role="banner">
+        <div className="container header-grid">
+          <div className="logo-section">
+            <div className="flag-badge" aria-hidden="true">
+              <div className="orange"></div>
+              <div className="white"></div>
+              <div className="green"></div>
+            </div>
+            <div className="logo-text">
+              <h1 className="logo-title" aria-label="MatMitra Platform">Mat<span>Mitra</span></h1>
+              <p className="logo-tagline">Empowering Democracy with AI</p>
+            </div>
           </div>
-          <div className="header-hindi">मेरा वोट, मेरा अधिकार</div>
-          <div className="header-sub">My Vote, My Right · Interactive Indian Election Education</div>
+          
+          <div className="stats-box" role="status" aria-label="Election Statistics">
+            <div className="stat-item">
+              <span className="stat-label">Voters</span>
+              <span className="stat-val">960M+</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <span className="stat-label">States</span>
+              <span className="stat-val">28+8</span>
+            </div>
+          </div>
         </div>
       </header>
     </>

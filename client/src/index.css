@@ -28,6 +28,50 @@ body {
   min-height: 100vh;
 }
 
+/* ♿ Accessibility: Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ♿ Accessibility: Skip Link */
+.skip-link {
+  z-index: 9999;
+  background: var(--navy);
+  color: white;
+  padding: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -100px;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ♿ Accessibility: Focus Indicators */
+:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body::before {
   content: '';
   position: fixed;

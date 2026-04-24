@@ -6,9 +6,13 @@ const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
-// Defensive check for Project ID
-const rawProjectId = process.env.GOOGLE_CLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.PROJECT_ID;
-// Ignore placeholder strings
+// Unified Project ID detection (Checks 4 common env vars)
+const rawProjectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 
+                   process.env.FIREBASE_PROJECT_ID || 
+                   process.env.GCP_PROJECT ||
+                   process.env.PROJECT_ID;
+
+// Filter out placeholder strings
 const projectId = (rawProjectId && !rawProjectId.includes('your-project') && !rawProjectId.includes('demo')) 
   ? rawProjectId 
   : undefined;
@@ -20,22 +24,27 @@ const secretManager = new SecretManagerServiceClient({ projectId });
 
 async function getSecret(secretName) {
   try {
-    const parentPath = projectId ? `projects/${projectId}` : `projects/current`;
+    const parentPath = projectId ? `projects/${projectId}` : `projects/undefined`;
     const [version] = await secretManager.accessSecretVersion({
       name: `${parentPath}/secrets/${secretName}/versions/latest`,
     });
     return version.payload.data.toString();
   } catch (err) {
-    console.warn(`💡 Secret ${secretName} fallback to .env:`, err.message);
+    if (!err.message.includes('Could not load the default credentials')) {
+        console.warn(`💡 Secret ${secretName} fallback to .env:`, err.message);
+    }
     return process.env[secretName.toUpperCase()] || null;
   }
 }
 
-// 2. Vertex AI Client - Vertex is strict, so we provide an explicit fallback
-const vertexAI = new VertexAI({ 
-  project: projectId || 'current', // 'current' is a valid alias in many GCP SDKs
-  location: region 
-});
+// 2. Vertex AI Client - MUST have a project ID to work
+// If it's missing, we log a warning instead of letting it crash the entire process at the top level
+let vertexAI;
+if (projectId) {
+  vertexAI = new VertexAI({ project: projectId, location: region });
+} else {
+  console.warn("⚠️ Vertex AI: No PROJECT_ID detected. Personalised briefings will be disabled.");
+}
 
 // 3. BigQuery Client
 const bigquery = new BigQuery({ projectId });
