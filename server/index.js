@@ -3,17 +3,17 @@ const cors = require('cors');
 
 // Capture startup errors
 process.on('uncaughtException', (err) => {
-    if (err.message.includes('Could not load the default credentials')) {
-        console.warn('💡 Local Mode: GCP Credentials not found. AI/Metrics/Logs might be disabled.');
-    } else {
-        console.error('🔥 CRITICAL STARTUP ERROR:', err.message);
-        console.error(err.stack);
-        process.exit(1);
-    }
+  if (err.message.includes('Could not load the default credentials')) {
+    console.warn('💡 Local Mode: GCP Credentials not found. AI/Metrics/Logs might be disabled.');
+  } else {
+    console.error('🔥 CRITICAL STARTUP ERROR:', err.message);
+    console.error(err.stack);
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.warn('⚠️ Unhandled Rejection:', reason.message || reason);
+  console.warn('⚠️ Unhandled Rejection:', reason.message || reason);
 });
 const { log, monitoringClient, projectId } = require('./config/google');
 require('dotenv').config();
@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 // 2. Custom Metrics Helper (Cloud Monitoring)
 async function reportMetric(metricType, value) {
   if (!monitoringClient) return;
-  
+
   const dataPoint = {
     interval: {
       endTime: {
@@ -99,8 +99,8 @@ app.get('/health', (req, res) => {
   res.send('OK');
 });
 
-// 4. Wildcard handler for SPA routing
-app.get('*', (req, res) => {
+// 4. Wildcard handler for SPA routing (Express 5 named parameter syntax)
+app.get('/:path*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
