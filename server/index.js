@@ -86,12 +86,22 @@ const chatRoutes = require('./routes/chat');
 const insightRoutes = require('./routes/insights');
 const analyticsRoutes = require('./routes/analytics');
 
+const path = require('path');
+
 app.use('/api/chat', chatRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
+// 3. Serve Static Files (The React Frontend)
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/health', (req, res) => {
   res.send('OK');
+});
+
+// 4. Wildcard handler for SPA routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 8080;
