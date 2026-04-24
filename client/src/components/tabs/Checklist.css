@@ -1,0 +1,19 @@
+.checklist-progress {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-bottom: 16px; letter-spacing: 1px;
+}
+.checklist { display:flex; flex-direction:column; gap:10px; }
+.cl-item {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 18px; background:var(--cream); border:1px solid var(--line);
+  border-radius:4px; cursor:pointer; transition:all 0.15s;
+}
+.cl-item:hover { border-color:var(--saffron); }
+.cl-item.checked { opacity:0.55; text-decoration:line-through; }
+.cl-box {
+  width:20px; height:20px; border:2px solid var(--saffron); border-radius:2px;
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:0.75rem; margin-top:1px; transition:background 0.15s;
+}
+.cl-item.checked .cl-box { background:var(--green); border-color:var(--green); color:#fff; }
+.cl-label { font-size:0.88rem; font-weight:600; line-height:1.5; }
+.cl-sub { font-size:0.76rem; color:var(--muted); margin-top:3px; }

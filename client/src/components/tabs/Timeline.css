@@ -1,0 +1,51 @@
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--saffron) 0, var(--saffron) 6px, transparent 6px, transparent 12px);
+}
+.tl-item { position: relative; margin-bottom: 28px; animation: fadeUp 0.4s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+.tl-dot {
+  position: absolute; left: -26px; top: 6px;
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 3px solid var(--saffron); background: var(--bg);
+}
+.tl-dot.done { background: var(--green); border-color: var(--green); }
+.tl-dot.active {
+  background: var(--saffron); border-color: var(--saffron);
+  box-shadow: 0 0 0 4px rgba(255,153,51,0.2);
+  animation: ping 1.5s ease-in-out infinite;
+}
+@keyframes ping {
+  0%,100%{box-shadow:0 0 0 4px rgba(255,153,51,0.2)}
+  50%{box-shadow:0 0 0 9px rgba(255,153,51,0.06)}
+}
+
+.tl-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+.tl-phase {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px;
+  border-radius: 2px; color: #fff;
+}
+.tl-title { font-family: 'Mukta', sans-serif; font-size: 1.05rem; font-weight: 700; }
+.tl-date { font-family: 'JetBrains Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+.tl-body { font-size: 0.86rem; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+.tl-sub { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.tl-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  padding: 3px 10px; border-radius: 12px;
+  background: var(--cream); border: 1px solid var(--line); color: var(--ink);
+}
+
+.section-header { margin-bottom: 28px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+.section-kicker {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--saffron); margin-bottom: 8px;
+}
+.section-headline {
+  font-family: 'Mukta', sans-serif; font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800; line-height: 1.1; color: var(--ink);
+}
+.section-deck { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.6; }

@@ -1,0 +1,784 @@
+import { useState, useEffect, useRef } from "react";
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Mukta:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --saffron:  #FF9933;
+    --saffron2: #ffb347;
+    --green:    #138808;
+    --green2:   #1aaa0a;
+    --navy:     #000080;
+    --white:    #ffffff;
+    --bg:       #fdf8f0;
+    --cream:    #fff4e0;
+    --ink:      #1a1005;
+    --muted:    #6b5a3a;
+    --line:     rgba(26,16,5,0.1);
+    --ashoka:   #1a1a6e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  /* ── TRICOLOR TOP BAR ─────────────────────────────── */
+  .tricolor-bar {
+    display: flex; height: 6px; position: relative; z-index: 20;
+  }
+  .tricolor-bar div { flex: 1; }
+
+  /* ── HEADER ───────────────────────────────────────── */
+  header {
+    position: relative; z-index: 10;
+    background: var(--navy);
+    border-bottom: 4px solid var(--saffron);
+  }
+  .header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .header-emblem { font-size: 1.8rem; }
+  .header-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase;
+  }
+  .header-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+    color: var(--saffron); border: 1px solid var(--saffron); border-radius: 3px;
+    padding: 3px 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .header-main { padding: 20px 28px 26px; text-align: center; }
+  .header-eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: var(--saffron2); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .header-title {
+    font-family: 'Mukta', sans-serif;
+    font-size: clamp(2rem, 6vw, 4rem); font-weight: 800;
+    color: #fff; line-height: 1.0; letter-spacing: -1px;
+  }
+  .header-title .mata { color: var(--saffron); }
+  .header-title .data { color: #fff; }
+  .header-hindi {
+    font-family: 'Tiro Devanagari Hindi', serif;
+    font-size: 1.1rem; color: rgba(255,255,255,0.6); margin-top: 4px;
+  }
+  .header-sub {
+    font-size: 0.88rem; color: rgba(255,255,255,0.45); margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── ASHOKA CHAKRA decoration ─────────────────────── */
+  .chakra-deco {
+    position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+    width: 60px; height: 60px; opacity: 0.12;
+    border: 3px solid var(--saffron); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+  }
+
+  /* ── NAV ──────────────────────────────────────────── */
+  nav {
+    background: var(--ink); border-bottom: 3px solid var(--saffron);
+    display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 50;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex-shrink: 0; padding: 13px 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); background: transparent; border: none;
+    cursor: pointer; border-right: 1px solid rgba(255,255,255,0.07);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-tab:hover { color: var(--saffron2); background: rgba(255,153,51,0.08); }
+  .nav-tab.active { color: var(--saffron); background: rgba(255,153,51,0.12); border-bottom: 2px solid var(--saffron); }
+
+  /* ── MAIN ─────────────────────────────────────────── */
+  main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 36px 20px 60px; }
+
+  /* ── SECTION HEADER ───────────────────────────────── */
+  .section-header { margin-bottom: 28px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+  .section-kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--saffron); margin-bottom: 8px;
+  }
+  .section-headline {
+    font-family: 'Mukta', sans-serif; font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 800; line-height: 1.1; color: var(--ink);
+  }
+  .section-deck { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+
+  /* ── TIMELINE ─────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, var(--saffron) 0, var(--saffron) 6px, transparent 6px, transparent 12px);
+  }
+  .tl-item { position: relative; margin-bottom: 28px; animation: fadeUp 0.4s ease both; }
+  .tl-item:nth-child(1){animation-delay:.05s} .tl-item:nth-child(2){animation-delay:.1s}
+  .tl-item:nth-child(3){animation-delay:.15s} .tl-item:nth-child(4){animation-delay:.2s}
+  .tl-item:nth-child(5){animation-delay:.25s} .tl-item:nth-child(6){animation-delay:.3s}
+  .tl-item:nth-child(7){animation-delay:.35s} .tl-item:nth-child(8){animation-delay:.4s}
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+  .tl-dot {
+    position: absolute; left: -26px; top: 6px;
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 3px solid var(--saffron); background: var(--bg);
+  }
+  .tl-dot.done { background: var(--green); border-color: var(--green); }
+  .tl-dot.active {
+    background: var(--saffron); border-color: var(--saffron);
+    box-shadow: 0 0 0 4px rgba(255,153,51,0.2);
+    animation: ping 1.5s ease-in-out infinite;
+  }
+  @keyframes ping {
+    0%,100%{box-shadow:0 0 0 4px rgba(255,153,51,0.2)}
+    50%{box-shadow:0 0 0 9px rgba(255,153,51,0.06)}
+  }
+
+  .tl-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+  .tl-phase {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px;
+    border-radius: 2px; color: #fff;
+  }
+  .tl-title { font-family: 'Mukta', sans-serif; font-size: 1.05rem; font-weight: 700; }
+  .tl-date { font-family: 'JetBrains Mono', monospace; font-size: 0.67rem; color: var(--muted); }
+  .tl-body { font-size: 0.86rem; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+  .tl-sub { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tl-pill {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+    padding: 3px 10px; border-radius: 12px;
+    background: var(--cream); border: 1px solid var(--line); color: var(--ink);
+  }
+
+  /* ── QUIZ ─────────────────────────────────────────── */
+  .quiz-card {
+    background: var(--cream); border: 2px solid var(--ink);
+    border-radius: 6px; padding: 28px;
+    box-shadow: 4px 4px 0 var(--saffron);
+  }
+  .quiz-progress { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--muted); margin-bottom:14px; letter-spacing:1px; }
+  .quiz-q { font-family:'Mukta',sans-serif; font-size:1.12rem; font-weight:700; margin-bottom:20px; line-height:1.4; }
+  .quiz-options { display:flex; flex-direction:column; gap:10px; }
+  .quiz-option {
+    padding:12px 16px; background:var(--bg);
+    border:1.5px solid var(--line); border-radius:4px;
+    cursor:pointer; font-size:0.88rem; text-align:left;
+    transition:all 0.15s; font-family:'Mukta',sans-serif;
+  }
+  .quiz-option:hover:not(:disabled) { border-color:var(--saffron); background:#fff8ee; transform:translateX(3px); }
+  .quiz-option.correct { border-color:var(--green); background:#f0fff4; color:#064e3b; }
+  .quiz-option.wrong   { border-color:#b91c1c; background:#fff5f5; color:#7f1d1d; }
+  .quiz-option:disabled { cursor:default; }
+  .quiz-feedback { margin-top:16px; padding:12px 16px; border-radius:4px; font-size:0.84rem; line-height:1.6; }
+  .quiz-feedback.correct { background:#f0fff4; color:#065f46; border-left:3px solid var(--green); }
+  .quiz-feedback.wrong   { background:#fff5f5; color:#7f1d1d; border-left:3px solid #b91c1c; }
+  .quiz-nav { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .quiz-btn {
+    padding:10px 22px; border:2px solid var(--ink); border-radius:3px;
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:600;
+    letter-spacing:1px; text-transform:uppercase; cursor:pointer;
+    transition:all 0.15s; background:transparent; color:var(--ink);
+  }
+  .quiz-btn.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
+  .quiz-btn:hover { transform:translateY(-1px); }
+  .score-box { text-align:center; padding:40px 20px; }
+  .score-num { font-family:'Mukta',sans-serif; font-size:5rem; font-weight:800; color:var(--saffron); line-height:1; }
+  .score-label { font-size:1rem; color:var(--muted); margin-top:8px; }
+
+  /* ── AI CHAT ──────────────────────────────────────── */
+  .chat-wrap {
+    background:var(--cream); border:2px solid var(--ink);
+    border-radius:6px; overflow:hidden;
+    box-shadow:4px 4px 0 var(--saffron);
+  }
+  .chat-header {
+    background:var(--navy); padding:14px 20px;
+    display:flex; align-items:center; gap:12px;
+    border-bottom:3px solid var(--saffron);
+  }
+  .chat-avatar {
+    width:38px; height:38px; border-radius:50%;
+    background:var(--saffron); display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem; flex-shrink:0;
+  }
+  .chat-title { font-family:'Mukta',sans-serif; font-weight:700; color:#fff; font-size:0.95rem; }
+  .chat-subtitle { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:rgba(255,255,255,0.45); letter-spacing:1px; }
+
+  .chat-msgs { padding:20px; display:flex; flex-direction:column; gap:14px; min-height:200px; max-height:340px; overflow-y:auto; }
+  .chat-msgs::-webkit-scrollbar { width:4px; }
+  .chat-msgs::-webkit-scrollbar-thumb { background:var(--saffron); border-radius:2px; }
+  .cmsg { display:flex; gap:10px; align-items:flex-start; }
+  .cmsg.user { flex-direction:row-reverse; }
+  .cmsg-av {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700;
+  }
+  .cmsg.ai   .cmsg-av { background:var(--navy); color:#fff; }
+  .cmsg.user .cmsg-av { background:var(--saffron); color:var(--ink); }
+  .cmsg-bubble {
+    padding:10px 14px; border-radius:4px; font-size:0.86rem; line-height:1.65; max-width:78%;
+    font-family:'Mukta',sans-serif;
+  }
+  .cmsg.ai   .cmsg-bubble { background:var(--bg); border:1px solid var(--line); }
+  .cmsg.user .cmsg-bubble { background:var(--navy); color:rgba(255,255,255,0.9); }
+
+  .chat-input-row { display:flex; border-top:2px solid var(--ink); }
+  .chat-input {
+    flex:1; padding:12px 16px;
+    font-family:'Mukta',sans-serif; font-size:0.88rem;
+    background:var(--bg); border:none; outline:none; color:var(--ink);
+    border-right:1px solid var(--line);
+  }
+  .chat-send {
+    padding:12px 22px; background:var(--saffron); border:none; cursor:pointer;
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:600;
+    letter-spacing:1px; text-transform:uppercase; color:var(--ink);
+    transition:background 0.15s;
+  }
+  .chat-send:hover { background:var(--saffron2); }
+  .chat-send:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* ── GLOSSARY ─────────────────────────────────────── */
+  .glossary-search {
+    width:100%; padding:12px 16px; margin-bottom:20px;
+    border:2px solid var(--ink); border-radius:4px; background:var(--cream);
+    font-family:'Mukta',sans-serif; font-size:0.9rem; color:var(--ink); outline:none;
+  }
+  .glossary-search:focus { border-color:var(--saffron); }
+  .glossary-list { display:flex; flex-direction:column; }
+  .gl-item {
+    padding:14px 0; border-bottom:1px solid var(--line);
+    display:grid; grid-template-columns:190px 1fr; gap:16px; align-items:baseline;
+  }
+  .gl-term { font-family:'Mukta',sans-serif; font-weight:700; font-size:0.95rem; color:var(--navy); }
+  .gl-def { font-size:0.84rem; color:var(--muted); line-height:1.65; }
+
+  /* ── CHECKLIST ────────────────────────────────────── */
+  .checklist { display:flex; flex-direction:column; gap:10px; }
+  .cl-item {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:14px 18px; background:var(--cream); border:1px solid var(--line);
+    border-radius:4px; cursor:pointer; transition:all 0.15s;
+  }
+  .cl-item:hover { border-color:var(--saffron); }
+  .cl-item.checked { opacity:0.55; text-decoration:line-through; }
+  .cl-box {
+    width:20px; height:20px; border:2px solid var(--saffron); border-radius:2px;
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; margin-top:1px; transition:background 0.15s;
+  }
+  .cl-item.checked .cl-box { background:var(--green); border-color:var(--green); color:#fff; }
+  .cl-label { font-size:0.88rem; font-weight:600; line-height:1.5; }
+  .cl-sub { font-size:0.76rem; color:var(--muted); margin-top:3px; }
+
+  /* ── INFO CARDS ───────────────────────────────────── */
+  .info-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .info-card {
+    background:var(--cream); border:1px solid var(--line); border-radius:4px;
+    padding:20px; border-top:3px solid var(--saffron);
+    box-shadow:2px 2px 0 rgba(26,16,5,0.06); transition:all 0.2s;
+  }
+  .info-card:hover { transform:translateY(-2px); box-shadow:4px 4px 0 rgba(26,16,5,0.1); }
+  .info-card-icon { font-size:1.8rem; margin-bottom:10px; }
+  .info-card-title { font-family:'Mukta',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:8px; }
+  .info-card-text { font-size:0.82rem; color:var(--muted); line-height:1.7; }
+  .info-card-tag {
+    display:inline-block; margin-top:10px;
+    font-family:'JetBrains Mono',monospace; font-size:0.6rem; letter-spacing:1px;
+    padding:3px 8px; background:var(--navy); color:#fff; border-radius:2px; text-transform:uppercase;
+  }
+
+  /* ── FOOTER ───────────────────────────────────────── */
+  footer {
+    text-align:center; padding:24px 20px;
+    border-top:2px solid var(--line); position:relative; z-index:1;
+    font-family:'JetBrains Mono',monospace; font-size:0.65rem;
+    color:var(--muted); letter-spacing:2px; text-transform:uppercase;
+  }
+  footer .accent { color:var(--saffron); }
+  footer .green  { color:var(--green); }
+
+  @media(max-width:560px){
+    .gl-item { grid-template-columns:1fr; }
+    .header-main { padding:14px 14px 18px; }
+    main { padding:24px 14px 50px; }
+    .chakra-deco { display:none; }
+  }
+`;
+
+/* ─── Data ─────────────────────────────────────────────────────────────── */
+const timelineData = [
+  {
+    phase: "मतदाता पंजीकरण", color: "#000080", done: true,
+    title: "Voter Registration (Form 6)",
+    date: "Ongoing — deadline ~30 days before election",
+    body: "Every Indian citizen aged 18+ can register on the Electoral Roll. Submit Form 6 online at voters.eci.gov.in or at your local BLO (Booth Level Officer). New voters added during Special Summary Revision drives every January.",
+    pills: ["Form 6", "Aadhaar-EPIC linking", "Voters.eci.gov.in", "BLO office", "NVSP portal"]
+  },
+  {
+    phase: "आचार संहिता", color: "#7b3f00", done: true,
+    title: "Model Code of Conduct (MCC)",
+    date: "Announced with election schedule",
+    body: "The Election Commission of India (ECI) announces the schedule, triggering the Model Code of Conduct. Political parties and candidates must follow rules on rallies, advertising, government announcements, and use of state resources.",
+    pills: ["ECI announcement", "MCC enforcement", "No freebies rule", "Media code", "cVIGIL app"]
+  },
+  {
+    phase: "नामांकन", color: "#000080", done: true,
+    title: "Candidate Nomination",
+    date: "Typically 1–4 weeks before polling",
+    body: "Candidates file nomination papers with the Returning Officer. Independent candidates pay ₹25,000 (General) / ₹12,500 (SC/ST) deposit. Party candidates get the official party symbol. Nominations are scrutinized and can be rejected.",
+    pills: ["Form 2A", "₹25,000 deposit", "Affidavit", "Returning Officer", "Symbol allotment"]
+  },
+  {
+    phase: "प्रचार", color: "#7b3f00", done: false, active: true,
+    title: "Election Campaign",
+    date: "From MCC to 48 hours before polling",
+    body: "Candidates campaign via rallies, door-to-door canvassing, social media, and TV. All campaign expenditure is monitored — limit is ₹95 lakh per Lok Sabha candidate. Campaign ends at 6 PM, 48 hours before polling day (Silence Period).",
+    pills: ["₹95 lakh limit", "Paid news rules", "STAR campaigner", "Silence period", "cVIGIL complaint"]
+  },
+  {
+    phase: "मतदान", color: "#138808", done: false,
+    title: "Voting Day (Polling)",
+    date: "Notified by ECI — varies by phase",
+    body: "Polls are held in phases across India. Bring your EPIC (Voter ID) or any of the 12 alternative photo IDs. Polling hours are 7 AM–6 PM. Press the EVM button next to your candidate's name and symbol. VVPAT gives you a 7-second paper slip to verify.",
+    pills: ["EPIC / Voter ID", "EVM voting", "VVPAT verification", "7 AM – 6 PM", "Indelible ink"]
+  },
+  {
+    phase: "मतगणना", color: "#000080", done: false,
+    title: "Vote Counting & Results",
+    date: "Counting Day — announced separately",
+    body: "EVM votes are counted by Returning Officers under strict supervision of candidates' counting agents. Postal ballots (for armed forces, overseas voters) are counted first. Results are declared seat by seat and published on ECI's results portal.",
+    pills: ["Counting agents", "Postal ballots", "EVM strong room", "ECI results portal", "Form 20"]
+  },
+  {
+    phase: "सरकार गठन", color: "#7b3f00", done: false,
+    title: "Government Formation",
+    date: "Within days of election results",
+    body: "The party or coalition with majority (272+ seats in Lok Sabha) is invited by the President to form the government. The leader is sworn in as Prime Minister by the President at Rashtrapati Bhavan. Council of Ministers is then appointed.",
+    pills: ["272+ majority", "President's invitation", "Coalition", "Swearing-in", "Cabinet formation"]
+  },
+  {
+    phase: "संसद सत्र", color: "#000080", done: false,
+    title: "Parliament Session & Budget",
+    date: "Within 6 months of election",
+    body: "The newly elected Parliament holds its first Budget Session. The President addresses a joint sitting of both Houses. A new Speaker is elected for the Lok Sabha. The first full Union Budget is presented by the Finance Minister.",
+    pills: ["Budget Session", "President's address", "Lok Sabha Speaker", "Union Budget", "Question Hour"]
+  }
+];
+
+const quizData = [
+  {
+    q: "What is the minimum age to vote in Indian elections?",
+    opts: ["16 years", "18 years", "21 years", "25 years"],
+    ans: 1,
+    exp: "Under Article 326 of the Indian Constitution, every citizen aged 18 and above is entitled to vote. The voting age was lowered from 21 to 18 by the 61st Constitutional Amendment Act, 1988."
+  },
+  {
+    q: "Which body conducts elections in India?",
+    opts: ["Parliament of India", "Supreme Court of India", "Election Commission of India (ECI)", "NITI Aayog"],
+    ans: 2,
+    exp: "The Election Commission of India (ECI) is an autonomous constitutional body established under Article 324. It is responsible for administering free and fair elections to Parliament, State Legislatures, and the offices of President and Vice President."
+  },
+  {
+    q: "What does EVM stand for in Indian elections?",
+    opts: ["Electronic Voter Machine", "Electronic Voting Machine", "Elected Vote Monitor", "Electoral Verification Module"],
+    ans: 1,
+    exp: "EVM stands for Electronic Voting Machine. India replaced paper ballots with EVMs starting in 1999. They are paired with VVPAT (Voter Verifiable Paper Audit Trail) machines since 2013 for transparency."
+  },
+  {
+    q: "How many seats does a party need to win a majority in Lok Sabha?",
+    opts: ["200 seats", "251 seats", "272 seats", "300 seats"],
+    ans: 2,
+    exp: "The Lok Sabha has 543 elected seats. A simple majority requires 272 seats (more than half of 543). If no single party wins 272, a coalition government is formed."
+  },
+  {
+    q: "What is the Model Code of Conduct (MCC)?",
+    opts: ["A law passed by Parliament to regulate elections", "ECI guidelines that political parties must follow during elections", "Rules for voters on election day", "The Code of Conduct for Election Commission officials"],
+    ans: 1,
+    exp: "The MCC is a set of guidelines issued by the ECI that political parties, candidates, and the government must follow from the date elections are announced until results are declared. It is not a statutory law but has moral and legal authority."
+  },
+  {
+    q: "What is NOTA in Indian elections?",
+    opts: ["Name of a new political party", "None Of The Above — a ballot option", "National Online Ticket Application", "Nominated Official Tracking App"],
+    ans: 1,
+    exp: "NOTA (None Of The Above) was introduced by the Supreme Court in 2013. It gives voters the right to reject all candidates on the ballot. If NOTA gets the most votes, the candidate with the second-highest votes wins — NOTA cannot technically win a seat."
+  },
+  {
+    q: "Which document is officially called EPIC in Indian elections?",
+    opts: ["Election Permission Identity Card", "Elector's Photo Identity Card", "Election Process Identification Certificate", "Electoral Participation Identity Card"],
+    ans: 1,
+    exp: "EPIC stands for Elector's Photo Identity Card, commonly called the Voter ID card. Issued by the ECI, it serves as the primary proof of voter registration. Alternatively, 12 other photo IDs like Aadhaar, Passport, or PAN card are also accepted at polling booths."
+  }
+];
+
+const glossaryData = [
+  { term: "EPIC / Voter ID", def: "Elector's Photo Identity Card — the official voter identity document issued by the Election Commission of India." },
+  { term: "EVM", def: "Electronic Voting Machine — used across India since 1999 to record and count votes electronically, replacing paper ballots." },
+  { term: "VVPAT", def: "Voter Verifiable Paper Audit Trail — a printer attached to the EVM that shows a 7-second paper slip confirming your vote." },
+  { term: "Form 6", def: "The application form for new voter registration submitted to the Electoral Registration Officer or online at voters.eci.gov.in." },
+  { term: "Model Code of Conduct", def: "A set of ECI guidelines binding on political parties and candidates from election announcement to result declaration." },
+  { term: "Returning Officer", def: "The officer appointed by the ECI responsible for conducting elections in a particular constituency." },
+  { term: "BLO", def: "Booth Level Officer — a grassroots official responsible for maintaining the electoral roll in a specific booth area." },
+  { term: "Lok Sabha", def: "The lower house of India's Parliament, with 543 directly elected members serving 5-year terms." },
+  { term: "Rajya Sabha", def: "The upper house of Parliament — 245 members, not directly elected but chosen by state legislators." },
+  { term: "Vidhan Sabha", def: "State Legislative Assembly — the lower house of state legislatures whose elections are also conducted by the ECI." },
+  { term: "NOTA", def: "None Of The Above — an option on the EVM allowing voters to reject all candidates. Introduced by Supreme Court order in 2013." },
+  { term: "Affidavit (Form 26)", def: "A sworn declaration filed by every candidate disclosing criminal records, assets, liabilities, and educational qualifications." },
+  { term: "cVIGIL", def: "An ECI mobile app that allows citizens to report Model Code of Conduct violations with geotagged photos and videos." },
+  { term: "NVSP", def: "National Voters' Service Portal — the ECI's online platform to register, update details, search your name on the electoral roll." },
+  { term: "Postal Ballot", def: "A ballot that allows certain voters (armed forces, essential service workers, overseas Indians) to vote by post before polling day." },
+  { term: "Anti-Defection Law", def: "10th Schedule of the Constitution — disqualifies an elected member if they voluntarily give up party membership or vote against party whip." },
+  { term: "Delimitation", def: "The process of redrawing boundaries of parliamentary and state assembly constituencies, done periodically by the Delimitation Commission." },
+];
+
+const checklistData = [
+  { label: "Check your name on the Electoral Roll", sub: "Visit voters.eci.gov.in or use the Voter Helpline 1950" },
+  { label: "Link your Aadhaar to your Voter ID (EPIC)", sub: "Do this on NVSP portal or via your BLO to strengthen your registration" },
+  { label: "Find your Polling Booth number and location", sub: "Your booth is printed on your EPIC or search on eci.gov.in" },
+  { label: "Carry your Voter ID or any of the 12 valid photo IDs", sub: "Alternatives: Aadhaar, Passport, PAN Card, Driving Licence, Bank Passbook with photo" },
+  { label: "Check polling date and time in your constituency", sub: "India votes in phases — verify your specific date on ECI website" },
+  { label: "Check candidates' affidavits before voting", sub: "View declared assets, liabilities, and criminal records at myneta.info" },
+  { label: "Report MCC violations using cVIGIL app", sub: "Download cVIGIL to report bribery, illegal rallies, or misuse of government resources" },
+  { label: "Verify your vote on VVPAT slip at the booth", sub: "You have 7 seconds to verify the candidate name and symbol on the paper trail" },
+];
+
+/* ─── Tab Components ──────────────────────────────────────────────────── */
+function TimelineTab() {
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">चुनाव प्रक्रिया — Election Process</div>
+        <div className="section-headline">8 Stages of an Indian General Election</div>
+        <div className="section-deck">From voter registration to Parliament session — every step of India's democratic process explained.</div>
+      </div>
+      <div className="timeline">
+        {timelineData.map((t, i) => (
+          <div key={i} className="tl-item">
+            <div className={`tl-dot ${t.done ? "done" : t.active ? "active" : ""}`} />
+            <div className="tl-header">
+              <span className="tl-phase" style={{ background: t.color }}>{t.phase}</span>
+              <span className="tl-title">{t.title}</span>
+            </div>
+            <div className="tl-date">{t.date}</div>
+            <div className="tl-body">{t.body}</div>
+            <div className="tl-sub">{t.pills.map((p, j) => <span key={j} className="tl-pill">{p}</span>)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function QuizTab() {
+  const [idx, setIdx] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+
+  function pick(i) {
+    if (selected !== null) return;
+    setSelected(i);
+    if (i === quizData[idx].ans) setScore(s => s + 1);
+  }
+  function next() {
+    if (idx + 1 >= quizData.length) { setDone(true); return; }
+    setIdx(i => i + 1); setSelected(null);
+  }
+  function restart() { setIdx(0); setSelected(null); setScore(0); setDone(false); }
+
+  if (done) return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">नागरिक परीक्षा</div>
+        <div className="section-headline">Quiz Complete! 🇮🇳</div>
+      </div>
+      <div className="quiz-card">
+        <div className="score-box">
+          <div className="score-num">{score}/{quizData.length}</div>
+          <div className="score-label">
+            {score === quizData.length ? "Perfect! आप एक जागरूक मतदाता हैं! 🎉" :
+             score >= 5 ? "Excellent! Strong civic knowledge." :
+             score >= 3 ? "Good effort! Review the Timeline to learn more." :
+             "Keep learning — visit the Timeline tab for all details!"}
+          </div>
+        </div>
+        <div className="quiz-nav">
+          <button className="quiz-btn primary" onClick={restart}>Retake Quiz</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const q = quizData[idx];
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">नागरिक परीक्षा — Civic Quiz</div>
+        <div className="section-headline">Test Your Election IQ</div>
+        <div className="section-deck">7 questions on Indian elections, ECI rules, and your voter rights.</div>
+      </div>
+      <div className="quiz-card">
+        <div className="quiz-progress">Question {idx + 1} of {quizData.length} · Score: {score}</div>
+        <div className="quiz-q">{q.q}</div>
+        <div className="quiz-options">
+          {q.opts.map((opt, i) => (
+            <button key={i}
+              className={`quiz-option ${selected === null ? "" : i === q.ans ? "correct" : i === selected ? "wrong" : ""}`}
+              onClick={() => pick(i)} disabled={selected !== null}>{opt}
+            </button>
+          ))}
+        </div>
+        {selected !== null && (
+          <div className={`quiz-feedback ${selected === q.ans ? "correct" : "wrong"}`}>
+            {selected === q.ans ? "✓ Sahi jawab! " : "✗ Galat jawab. "}{q.exp}
+          </div>
+        )}
+        {selected !== null && (
+          <div className="quiz-nav">
+            <button className="quiz-btn primary" onClick={next}>
+              {idx + 1 >= quizData.length ? "See Results" : "Next Question →"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AiTab() {
+  const [msgs, setMsgs] = useState([
+    { role: "ai", text: "नमस्ते! 🙏 I'm your Indian Election Assistant. Ask me anything about the Indian election process — voter registration, EVM, ECI, how to vote, your rights as a voter, or how the government is formed. You can ask in English or Hindi!" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef(null);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
+
+  async function send() {
+    if (!input.trim() || loading) return;
+    const q = input.trim(); setInput("");
+    setMsgs(m => [...m, { role: "user", text: q }]);
+    setLoading(true);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `You are MataData's Indian Election Education Assistant — a friendly, knowledgeable, and strictly nonpartisan civic education guide for Indian voters. Your role is to help Indian citizens understand how elections work in India.
+
+Topics you cover:
+- Voter registration process (Form 6, NVSP portal, BLO, EPIC/Voter ID, Aadhaar linking)
+- The Election Commission of India (ECI) and its powers under Article 324
+- How Lok Sabha, Rajya Sabha, and State Assembly (Vidhan Sabha) elections work
+- EVM (Electronic Voting Machine) and VVPAT — how they work and why they are secure
+- Model Code of Conduct (MCC) — what it means and how to report violations via cVIGIL
+- Voting Day procedures — polling booths, valid ID proofs, indelible ink, NOTA option
+- How votes are counted and results declared
+- Government formation — how the President invites the majority party or coalition
+- Candidate nomination, affidavits, and campaign spending limits
+- Indian electoral terms: Returning Officer, BLO, constituency, constituency, anti-defection law
+
+Rules:
+- Be factual, clear, and educational
+- Never express opinions on political parties, candidates, or government policies
+- Use plain language accessible to first-time Indian voters
+- You can respond in Hindi if the user writes in Hindi
+- When uncertain, refer to official sources: eci.gov.in, voters.eci.gov.in, myneta.info
+- Keep responses to 3-5 sentences unless detail is needed
+- Always encourage civic participation — "Mera Vote, Mera Adhikar!"`,
+          messages: [{ role: "user", content: q }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.find(b => b.type === "text")?.text || "I couldn't reach the AI right now. Please try again!";
+      setMsgs(m => [...m, { role: "ai", text }]);
+    } catch {
+      setMsgs(m => [...m, { role: "ai", text: "Connection issue. Please try again in a moment." }]);
+    }
+    setLoading(false);
+  }
+
+  const suggestions = [
+    "EVM kaise kaam karta hai?",
+    "How do I register to vote?",
+    "What is NOTA?",
+    "How is PM selected after election?"
+  ];
+
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">AI सहायक — AI Assistant</div>
+        <div className="section-headline">Ask the Election Assistant</div>
+        <div className="section-deck">Powered by Gemini — nonpartisan, bilingual (English + Hindi), always factual.</div>
+      </div>
+      <div className="chat-wrap">
+        <div className="chat-header">
+          <div className="chat-avatar">🗳️</div>
+          <div>
+            <div className="chat-title">Indian Election Assistant</div>
+            <div className="chat-subtitle">Powered by Google Gemini · Niष्पक्ष (Nonpartisan)</div>
+          </div>
+        </div>
+        <div className="chat-msgs">
+          {msgs.map((m, i) => (
+            <div key={i} className={`cmsg ${m.role}`}>
+              <div className="cmsg-av">{m.role === "ai" ? "AI" : "आप"}</div>
+              <div className="cmsg-bubble">{m.text}</div>
+            </div>
+          ))}
+          {loading && <div className="cmsg ai"><div className="cmsg-av">AI</div><div className="cmsg-bubble" style={{ color: "var(--muted)" }}>Soch raha hoon…</div></div>}
+          <div ref={endRef} />
+        </div>
+        <div className="chat-input-row">
+          <input className="chat-input" value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && send()}
+            placeholder="English ya Hindi mein poochhen…" />
+          <button className="chat-send" onClick={send} disabled={loading || !input.trim()}>पूछें →</button>
+        </div>
+      </div>
+      <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {suggestions.map(q => (
+          <button key={q} className="quiz-btn" style={{ fontSize: "0.7rem", padding: "6px 14px" }}
+            onClick={() => setInput(q)}>{q}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GlossaryTab() {
+  const [search, setSearch] = useState("");
+  const filtered = glossaryData.filter(g =>
+    g.term.toLowerCase().includes(search.toLowerCase()) ||
+    g.def.toLowerCase().includes(search.toLowerCase())
+  );
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">शब्दकोश — Reference Glossary</div>
+        <div className="section-headline">Indian Election Terms</div>
+        <div className="section-deck">Key terms every Indian voter should know — from EVM to NOTA to VVPAT.</div>
+      </div>
+      <input className="glossary-search" placeholder="Search terms… e.g. NOTA, EVM, BLO"
+        value={search} onChange={e => setSearch(e.target.value)} />
+      <div className="glossary-list">
+        {filtered.map((g, i) => (
+          <div key={i} className="gl-item">
+            <div className="gl-term">{g.term}</div>
+            <div className="gl-def">{g.def}</div>
+          </div>
+        ))}
+        {!filtered.length && <div style={{ color: "var(--muted)", fontStyle: "italic", padding: "20px 0" }}>No terms found.</div>}
+      </div>
+    </div>
+  );
+}
+
+function ChecklistTab() {
+  const [checked, setChecked] = useState([]);
+  function toggle(i) { setChecked(c => c.includes(i) ? c.filter(x => x !== i) : [...c, i]); }
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-kicker">मतदाता तैयारी — Voter Prep</div>
+        <div className="section-headline">Your Election Day Checklist</div>
+        <div className="section-deck">मेरा वोट, मेरा अधिकार — Check off each step before heading to your polling booth.</div>
+      </div>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "0.7rem", color: "var(--muted)", marginBottom: 16, letterSpacing: "1px" }}>
+        {checked.length} / {checklistData.length} COMPLETE
+      </div>
+      <div className="checklist">
+        {checklistData.map((c, i) => (
+          <div key={i} className={`cl-item ${checked.includes(i) ? "checked" : ""}`} onClick={() => toggle(i)}>
+            <div className="cl-box">{checked.includes(i) ? "✓" : ""}</div>
+            <div>
+              <div className="cl-label">{c.label}</div>
+              <div className="cl-sub">{c.sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const TABS = [
+  { id: "timeline",  label: "📅 Timeline",  Comp: TimelineTab },
+  { id: "quiz",      label: "🧠 Quiz",      Comp: QuizTab },
+  { id: "ai",        label: "🤖 AI Sahayak", Comp: AiTab },
+  { id: "glossary",  label: "📖 Glossary",  Comp: GlossaryTab },
+  { id: "checklist", label: "✅ Checklist", Comp: ChecklistTab },
+];
+
+const today = new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
+
+export default function App() {
+  const [active, setActive] = useState("timeline");
+  const { Comp } = TABS.find(t => t.id === active);
+  return (
+    <>
+      <style>{css}</style>
+
+      {/* Tricolor bar */}
+      <div className="tricolor-bar">
+        <div style={{ background: "#FF9933" }} />
+        <div style={{ background: "#ffffff", borderTop: "1px solid #eee", borderBottom: "1px solid #eee" }} />
+        <div style={{ background: "#138808" }} />
+      </div>
+
+      <header>
+        <div className="header-top">
+          <div className="header-emblem">🇮🇳</div>
+          <div className="header-date">{today}</div>
+          <div className="header-badge">Google Antigravity 2025</div>
+        </div>
+        <div className="header-main" style={{ position: "relative" }}>
+          <div className="chakra-deco">⊙</div>
+          <div className="header-eyebrow">भारत निर्वाचन आयोग · Civic Education Platform</div>
+          <div className="header-title">
+            <span className="mata">Mata</span><span className="data">Data</span>
+          </div>
+          <div className="header-hindi">मेरा वोट, मेरा अधिकार</div>
+          <div className="header-sub">My Vote, My Right · Interactive Indian Election Education</div>
+        </div>
+      </header>
+
+      <nav>
+        {TABS.map(t => (
+          <button key={t.id} className={`nav-tab ${active === t.id ? "active" : ""}`}
+            onClick={() => setActive(t.id)}>{t.label}</button>
+        ))}
+      </nav>
+
+      <main><Comp /></main>
+
+      <footer>
+        <span className="accent">MataData</span> · Built for <span className="accent">Google Antigravity Prompt Wars 2025</span> ·
+        Powered by Gemini AI · <span className="green">जय हिन्द 🇮🇳</span>
+      </footer>
+    </>
+  );
+}

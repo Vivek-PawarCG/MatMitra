@@ -1,0 +1,102 @@
+.tricolor-bar {
+  display: flex;
+  height: 6px;
+  position: relative;
+  z-index: 20;
+}
+.tricolor-bar div { flex: 1; }
+.tricolor-bar .saffron { background: var(--saffron); }
+.tricolor-bar .white { background: var(--white); border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+.tricolor-bar .green { background: var(--green); }
+
+.main-header {
+  position: relative;
+  z-index: 10;
+  background: var(--navy);
+  border-bottom: 4px solid var(--saffron);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.header-emblem { font-size: 1.8rem; }
+.header-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.header-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--saffron);
+  border: 1px solid var(--saffron);
+  border-radius: 3px;
+  padding: 3px 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.header-content {
+  padding: 20px 28px 26px;
+  text-align: center;
+  position: relative;
+}
+
+.header-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--saffron2);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.header-title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.0;
+  letter-spacing: -1px;
+}
+
+.header-title .mata { color: var(--saffron); }
+.header-title .data { color: #fff; }
+
+.header-hindi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+
+.header-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+.chakra-deco {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  opacity: 0.12;
+  border: 3px solid var(--saffron);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  color: var(--saffron);
+}

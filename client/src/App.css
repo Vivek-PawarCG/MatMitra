@@ -1,0 +1,43 @@
+.top-nav-bar {
+    background: #0a0a0a;
+    border-bottom: 1px solid rgba(255,153,51,0.2);
+}
+
+.tab-nav {
+  background: var(--ink); border-bottom: 3px solid var(--saffron);
+  display: flex; gap: 0; overflow-x: auto; position: sticky; top: 0; z-index: 50;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  flex-shrink: 0; padding: 13px 20px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); background: transparent; border: none;
+  cursor: pointer; border-right: 1px solid rgba(255,255,255,0.07);
+  transition: all 0.2s; white-space: nowrap;
+}
+.nav-tab:hover { color: var(--saffron2); background: rgba(255,153,51,0.08); }
+.nav-tab.active { color: var(--saffron); background: rgba(255,153,51,0.12); border-bottom: 2px solid var(--saffron); }
+
+.briefing-section { margin-top: 50px; }
+.briefing-cta { padding: 30px; text-align: center; }
+.briefing-cta h3 { font-size: 1.4rem; margin-bottom: 10px; }
+.briefing-cta p { color: var(--muted); margin-bottom: 20px; }
+
+.primary-btn {
+  padding: 12px 24px; background: var(--navy); color: #fff;
+  border: 2px solid var(--navy); border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.primary-btn:hover { background: #0000a0; transform: translateY(-2px); }
+
+.footer {
+  text-align: center; padding: 24px 20px;
+  border-top: 2px solid var(--line); position: relative; z-index: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+}
+.footer .accent { color: var(--saffron); }
+.footer .green { color: var(--green); }
