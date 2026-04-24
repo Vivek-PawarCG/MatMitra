@@ -29,7 +29,7 @@ router.post('/briefing', async (req, res) => {
     res.json({ briefing });
   } catch (err) {
     console.error('Insights error:', err);
-    res.status(500).json({ error: 'Failed to generate personalized briefing' });
+    res.status(500).json({ error: 'Failed to generate personalized briefing', details: err.message });
   }
 });
 

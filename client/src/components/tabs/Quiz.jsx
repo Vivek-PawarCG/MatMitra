@@ -14,7 +14,7 @@ export function Quiz() {
     localStorage.setItem('matmitra_quiz_score', finalScore);
     
     // Track in BigQuery (Guest Mode)
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/analytics/track`, {
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/analytics/track`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

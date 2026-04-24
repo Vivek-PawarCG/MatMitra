@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../../services/firebase';
 import './VoterReport.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export function VoterReport() {
   const [report, setReport] = useState(null);

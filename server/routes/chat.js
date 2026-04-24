@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
     res.json({ text: responseText });
   } catch (err) {
     console.error('Chat error:', err);
-    res.status(500).json({ error: 'Failed to communicate with AI Sahayak' });
+    res.status(500).json({ error: 'Failed to communicate with AI Sahayak', details: err.message });
   }
 });
 
