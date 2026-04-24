@@ -18,9 +18,9 @@ const BriefingSchema = z.object({
  */
 router.post('/briefing', async (req, res) => {
   if (!vertexAI) {
-    return res.status(500).json({ 
-      error: 'Vertex AI is not configured', 
-      details: 'PROJECT_ID is missing in server environment.' 
+    return res.status(500).json({
+      error: 'Vertex AI is not configured',
+      details: 'PROJECT_ID is missing in server environment.'
     });
   }
 
@@ -28,7 +28,7 @@ router.post('/briefing', async (req, res) => {
     const { userData } = BriefingSchema.parse(req.body);
 
     const model = vertexAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash-lite',
     });
 
     const prompt = `Analyze this voter's civic readiness data and provide a professional, encouraging personalized briefing.
