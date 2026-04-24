@@ -6,8 +6,13 @@ const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
-const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+// Priority: Real Env Var > Local Env File
+const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'promptwars-492606';
 const region = process.env.GOOGLE_CLOUD_REGION || 'europe-west1';
+
+if (!projectId) {
+  console.warn("⚠️ CRITICAL: GOOGLE_CLOUD_PROJECT_ID is not set. Cloud services may fail.");
+}
 
 const secretManager = new SecretManagerServiceClient({ projectId });
 
@@ -23,7 +28,7 @@ async function getSecret(secretName) {
   }
 }
 
-const vertexAI = (projectId && !projectId.includes('your-project')) ? new VertexAI({ project: projectId, location: region }) : null;
+const vertexAI = (projectId) ? new VertexAI({ project: projectId, location: region }) : null;
 const bigquery = new BigQuery({ projectId });
 const logging = new Logging({ projectId });
 const log = logging.log('matmitra-app-log');
@@ -31,7 +36,7 @@ const log = logging.log('matmitra-app-log');
 let monitoringClient;
 try {
   monitoringClient = new monitoring.MetricServiceClient({ projectId });
-} catch (e) {}
+} catch (e) { }
 
 const getGeminiClient = async () => {
   const apiKey = await getSecret('GEMINI_API_KEY');

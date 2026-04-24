@@ -16,8 +16,9 @@ router.post('/', async (req, res) => {
 
   try {
     const client = await getGeminiClient();
+    // Using gemini-2.5-flash-lite as requested
     const model = client.getGenerativeModel({ 
-        model: "gemini-1.5-flash-lite", 
+        model: "gemini-2.5-flash-lite", 
         systemInstruction: SYSTEM_PROMPT 
     });
 
