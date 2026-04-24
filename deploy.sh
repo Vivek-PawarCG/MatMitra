@@ -2,7 +2,7 @@
 
 # Configuration
 SERVICE_NAME="matmitra"
-REGION="asia-south1"
+REGION=" europe-west1"
 PROJECT_ID=$(gcloud config get-value project)
 
 echo "🚀 Starting deployment for $SERVICE_NAME in $PROJECT_ID..."

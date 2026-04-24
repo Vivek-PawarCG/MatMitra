@@ -15,7 +15,7 @@ steps:
       - 'deploy'
       - 'matmitra'
       - '--image=gcr.io/$PROJECT_ID/matmitra'
-      - '--region=asia-south1'
+      - '--region= europe-west1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--set-secrets=GEMINI_API_KEY=gemini-api-key:latest'

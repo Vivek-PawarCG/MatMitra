@@ -57,12 +57,12 @@ Phase 1 ──────────── Phase 2 ─────────
 |------|-------------|-------------|
 | GCP project setup | Enable APIs, create project | Cloud Console |
 | Artifact Registry | Push Docker image | Artifact Registry |
-| Cloud Run service | Deploy containerized app | Cloud Run (asia-south1) |
+| Cloud Run service | Deploy containerized app | Cloud Run ( europe-west1) |
 | Secret Manager | Store Gemini API key securely | Secret Manager |
 | Custom domain | Map domain via Cloud Run domain mapping | Cloud Run |
 | CI/CD pipeline | Auto-deploy on push to `main` | Cloud Build |
 
-**Region:** `asia-south1` (Mumbai) — optimal latency for Indian users
+**Region:** ` europe-west1` (Mumbai) — optimal latency for Indian users
 
 **Deliverable:** Live URL — `https://matadata-xxxxx-el.a.run.app`
 
@@ -108,7 +108,7 @@ Browser / PWA (Mobile-first for Indian users)
                       ▼
 ┌──────────────────────────────────────────────┐
 │         Google Cloud Run                     │
-│   Region: asia-south1 (Mumbai)               │
+│   Region:  europe-west1 (Mumbai)               │
 │   Auto-scaling │ HTTPS │ IAM auth            │
 │   Secret Manager (Gemini API key)            │
 │   Artifact Registry (Docker images)          │
@@ -139,7 +139,7 @@ Audience: Indian voters — especially first-time voters aged 18-25
 Purpose: Interactive, nonpartisan education on the Indian election process
 Language: Bilingual — English primary, Hindi secondary (Devanagari script)
 AI model: Google Gemini 2.0 Flash (gemini-2.0-flash)
-Deploy target: Google Cloud Run (asia-south1 — Mumbai region)
+Deploy target: Google Cloud Run ( europe-west1 — Mumbai region)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🗂️ TECH STACK
@@ -160,7 +160,7 @@ Backend:
 
 Infrastructure:
 - Docker (multi-stage build)
-- Google Cloud Run — region: asia-south1 (Mumbai)
+- Google Cloud Run — region:  europe-west1 (Mumbai)
 - Google Artifact Registry
 - Google Secret Manager (GEMINI_API_KEY)
 - Google Cloud Build (CI/CD via cloudbuild.yaml)
@@ -322,7 +322,7 @@ Generate a shell script deploy.sh with these exact steps:
 
 Step 1 — Set variables
   PROJECT_ID=$(gcloud config get-value project)
-  REGION=asia-south1          # Mumbai — best latency for India
+  REGION= europe-west1          # Mumbai — best latency for India
   SERVICE_NAME=matadata
   IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME
 
@@ -374,7 +374,7 @@ steps:
       - deploy
       - matadata
       - --image=gcr.io/$PROJECT_ID/matadata
-      - --region=asia-south1
+      - --region= europe-west1
       - --platform=managed
       - --allow-unauthenticated
       - --set-secrets=GEMINI_API_KEY=gemini-api-key:latest
@@ -428,7 +428,7 @@ Tab 5 — ✅ Checklist (8 Indian voter prep steps)
 [ ] Gemini responds in Hindi when queried in Hindi
 [ ] Docker image builds: docker build -t matadata .
 [ ] App runs locally: docker run -p 8080:8080 matadata
-[ ] gcloud run deploy succeeds in asia-south1 region
+[ ] gcloud run deploy succeeds in  europe-west1 region
 [ ] Live HTTPS URL accessible from Indian networks
 [ ] Lighthouse score > 85 on mobile
 [ ] No console errors in production
@@ -441,7 +441,7 @@ Tab 5 — ✅ Checklist (8 Indian voter prep steps)
 
 | Service | Purpose | Notes |
 |---|---|---|
-| **Cloud Run** | Host containerized app | `asia-south1` (Mumbai) for Indian latency |
+| **Cloud Run** | Host containerized app | ` europe-west1` (Mumbai) for Indian latency |
 | **Artifact Registry** | Store Docker images | Native GCP image registry |
 | **Secret Manager** | Store Gemini API key | Never hardcode secrets |
 | **Cloud Build** | CI/CD pipeline | Auto-deploy on git push |

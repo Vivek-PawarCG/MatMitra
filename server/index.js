@@ -1,5 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+
+// Capture startup errors
+process.on('uncaughtException', (err) => {
+    if (err.message.includes('Could not load the default credentials')) {
+        console.warn('💡 Local Mode: GCP Credentials not found. AI/Metrics/Logs might be disabled.');
+    } else {
+        console.error('🔥 CRITICAL STARTUP ERROR:', err.message);
+        console.error(err.stack);
+        process.exit(1);
+    }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.warn('⚠️ Unhandled Rejection:', reason.message || reason);
+});
 const { log, monitoringClient, projectId } = require('./config/google');
 require('dotenv').config();
 
@@ -27,6 +42,8 @@ app.use((req, res, next) => {
 
 // 2. Custom Metrics Helper (Cloud Monitoring)
 async function reportMetric(metricType, value) {
+  if (!monitoringClient) return;
+  
   const dataPoint = {
     interval: {
       endTime: {
@@ -60,7 +77,7 @@ async function reportMetric(metricType, value) {
     await monitoringClient.createTimeSeries(request);
     console.log(`Metric ${metricType} reported: ${value}`);
   } catch (err) {
-    console.error('Error reporting metric:', err);
+    console.error('Error reporting metric:', err.message);
   }
 }
 
@@ -80,5 +97,7 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  reportMetric('server_start', 1);
+  reportMetric('server_start', 1).catch(err => {
+    console.log("📊 Metrics: Bypassing local report (no credentials)");
+  });
 });
