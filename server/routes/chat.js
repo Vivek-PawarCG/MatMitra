@@ -16,10 +16,10 @@ router.post('/', async (req, res) => {
 
   try {
     const client = await getGeminiClient();
-    const model = client.getGenerativeModel({ model: "gemini-1.5-flash-lite", systemInstruction: SYSTEM_PROMPT });
+    const model = client.getGenerativeModel({ model: "gemini-2.5-flash-lite", systemInstruction: SYSTEM_PROMPT });
 
     const chat = model.startChat({
-        history: history || [],
+      history: history || [],
     });
 
     const result = await chat.sendMessage(message);
