@@ -76,7 +76,7 @@ export function AiSahayak() {
           </div>
         </div>
         
-        <div className="chat-msgs">
+        <div className="msg-bubbles" aria-live="polite" aria-relevant="additions">
           {msgs.map((m, i) => (
             <div key={i} className={`cmsg ${m.role}`}>
               <div className="cmsg-av">{m.role === "ai" ? "AI" : "आप"}</div>
