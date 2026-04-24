@@ -28,10 +28,12 @@ export function AiSahayak() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: q,
-          history: msgs.map(m => ({ 
-            role: m.role === 'ai' ? 'model' : 'user', 
-            parts: [{ text: m.text }] 
-          }))
+          history: msgs
+            .filter((m, i) => i > 0) // Skip the first AI greeting so history starts with 'user'
+            .map(m => ({ 
+              role: m.role === 'ai' ? 'model' : 'user', 
+              parts: [{ text: m.text }] 
+            }))
         })
       });
       const data = await res.json();
