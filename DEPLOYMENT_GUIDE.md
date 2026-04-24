@@ -21,18 +21,16 @@ Ensure you have a Google Cloud Project and the `gcloud` CLI installed and authen
     gcloud config set project [YOUR_PROJECT_ID]
     ```
 
-## 🔐 2. Secret Manager Setup (Crucial)
-The app is configured to fetch the Gemini API Key from Secret Manager for security.
+## 🔐 2. Secret Manager Setup
+The app fetches the Gemini API Key from Secret Manager.
 
 1.  **Create the Secret**:
     ```bash
     echo -n "YOUR_GEMINI_API_KEY" | gcloud secrets create gemini-api-key --data-file=-
     ```
 2.  **Grant Access**:
-    Give the Compute Engine default service account (used by Cloud Run) access to read this secret:
     ```bash
     PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')
-    
     gcloud secrets add-iam-policy-binding gemini-api-key \
       --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
       --role="roles/secretmanager.secretAccessor"
@@ -42,11 +40,10 @@ The app is configured to fetch the Gemini API Key from Secret Manager for securi
 1.  **Firestore**:
     - Go to the GCP Console -> Firestore.
     - Create a database in **Native Mode**.
-    - Choose a region close to your users (e.g., `asia-south1`).
+    - **No Private Key is needed** — simply ensure your Cloud Run Service Account has the `Cloud Datastore User` role.
 2.  **BigQuery**:
     - Go to BigQuery Console.
     - Create a Dataset named `matmitra_analytics`.
-    - Create a Table named `user_interactions` with a flexible schema or allow auto-detect.
 
 ## 🚀 4. Final Deployment
 Use the provided automation script to build the frontend and deploy the backend.
