@@ -6,7 +6,7 @@
 
 ## 🛠️ Google Cloud Architecture
 
-MatMitra integrates 9 distinct Google Cloud services to create a robust, production-ready environment:
+MatMitra integrates **9 distinct Google Cloud services** to create a robust, production-ready environment:
 
 1.  **Gemini 2.5 Flash Lite** (`@google/generative-ai`): Powers the AI Sahayak chat interface for instant, factual voter support.
 2.  **Vertex AI** (`@google-cloud/vertexai`): Professional-grade engine for generating personalized civic readiness briefings.
@@ -27,40 +27,49 @@ Safe and responsible implementation across every layer:
 | Layer | Implementation |
 |-------|----------------|
 | **HTTP Headers** | Helmet.js (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) |
-| **Rate Limiting** | 100 req/15min global, 10 req/min for AI endpoints |
 | **Input Sanitization** | **Zod Rigid Execution** — Strictly validated types & regex-based XSS prevention |
 | **Secret Management** | **GCP Secret Manager** — API keys are never stored in code or ENV vars |
 | **Container Security** | Non-root user in Docker (`nodeapp`), alpine-slim base image |
-| **CORS** | Whitelist-based origin validation for hackathon safety |
+| **Rate Limiting** | Tiered limiting: 100 req/15min global, 10 req/min for AI endpoints |
 
 ---
 
 ## ⚡ Efficiency
 
 - **Gzip Compression**: All API responses are compressed to minimize bandwidth.
-- **Smart Fallbacks**: Defensive project auto-detection handles local/prod transitions without crashes.
-- **Multi-stage Docker**: Final production image is ~150MB (down from ~1GB).
-- **Auto-scaling**: Infrastructure scales from 0 to 3 instances, ensuring zero cost when idle.
+- **Vite Proxy**: Optimized local development environment and relative production API calls.
+- **Multi-stage Docker**: Final production image size optimized (~150MB).
+- **Auto-scaling**: Infrastructure scales dynamically on Cloud Run for cost efficiency.
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing Pipeline
 
-Validation of full functionality with a robust pipeline:
-- **API Integration Tests**: Supertest validates endpoint structures and error handling.
-- **Zod Validation**: Dedicated tests for injection prevention and schema integrity.
-- **Static Analysis**: ESLint and Prettier for code quality.
+Validation of full functionality with a robust dual-framework pipeline:
 
+```bash
+# Backend: Jest + Supertest
+npm test --prefix server
+# Validates: Health checks, Zod schema integrity, API error handling
+
+# Frontend: Vitest + React Testing Library
+npm test --prefix client
+# Validates: Component rendering, Accessibility (A11y), Data presence (NOTA/BLO)
+```
+- **Vitest Framework** — DOM simulation verifying React component behavior
+- **API Integration Tests** — Supertest validates endpoints
+- **Zod Validation tests** — XSS prevention, length limits, type checking
+- **Build verification** — Vite production build validated on every change
+- **Health endpoint** — `/api/health` for Cloud Run liveness probes
 ---
 
 ## ♿ Accessibility (A11y)
 
 Inclusive design mathematically validated for accessibility:
-- **Skip Link**: "Skip to main content" link for keyboard/screen reader users.
-- **ARIA Landmark Roles**: Proper usage of `banner`, `main`, `contentinfo`, and `status`.
-- **Keyboard Navigation**: Fully navigable via TAB and Enter keys.
-- **Motion Sensitivity**: `prefers-reduced-motion` media query respects OS-level accessibility settings.
-- **Contrast**: WCAG AA compliant text contrast for our "Tricolor" design system.
+- **Skip Link**: "Skip to main content" link for keyboard/screen reader efficiency.
+- **ARIA Landmark Roles**: Usage of `banner`, `main`, `contentinfo`, and `status`.
+- **Focus Indicators**: High-contrast `:focus-visible` rings for keyboard navigation.
+- **Semantic HTML**: Structural tags used to create a clear document outline for assistive tech.
 
 ---
 
@@ -69,4 +78,3 @@ Inclusive design mathematically validated for accessibility:
 - **Backend**: Node.js (Express)
 - **Build**: Cloud Build (CI/CD)
 
-*जय हिन्द! 🇮🇳*
