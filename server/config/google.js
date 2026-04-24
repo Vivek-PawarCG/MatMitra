@@ -6,44 +6,46 @@ const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
-// Unified Project ID detection (Checks 4 common env vars)
-const rawProjectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 
-                   process.env.FIREBASE_PROJECT_ID || 
-                   process.env.GCP_PROJECT ||
-                   process.env.PROJECT_ID;
-
-// Filter out placeholder strings
-const projectId = (rawProjectId && !rawProjectId.includes('your-project') && !rawProjectId.includes('demo')) 
-  ? rawProjectId 
-  : undefined;
+// Consolidated Project ID detection
+const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 
+                  process.env.FIREBASE_PROJECT_ID || 
+                  process.env.GCP_PROJECT || 
+                  process.env.PROJECT_ID;
 
 const region = process.env.GOOGLE_CLOUD_REGION || 'europe-west1';
 
 // 1. Secret Manager Client
 const secretManager = new SecretManagerServiceClient({ projectId });
 
+/**
+ * Robust secret fetcher with environment fallback
+ */
 async function getSecret(secretName) {
   try {
-    const parentPath = projectId ? `projects/${projectId}` : `projects/undefined`;
+    // In Cloud Run, 'current' is the easiest way to refer to the active project
+    const parent = projectId ? `projects/${projectId}` : 'projects/current';
     const [version] = await secretManager.accessSecretVersion({
-      name: `${parentPath}/secrets/${secretName}/versions/latest`,
+      name: `${parent}/secrets/${secretName}/versions/latest`,
     });
     return version.payload.data.toString();
   } catch (err) {
+    // Only log if it's not a standard "local mode" error
     if (!err.message.includes('Could not load the default credentials')) {
-        console.warn(`💡 Secret ${secretName} fallback to .env:`, err.message);
+      console.warn(`💡 Secret ${secretName} from .env fallback:`, err.message);
     }
     return process.env[secretName.toUpperCase()] || null;
   }
 }
 
-// 2. Vertex AI Client - MUST have a project ID to work
-// If it's missing, we log a warning instead of letting it crash the entire process at the top level
+// 2. Vertex AI Client
 let vertexAI;
-if (projectId) {
-  vertexAI = new VertexAI({ project: projectId, location: region });
-} else {
-  console.warn("⚠️ Vertex AI: No PROJECT_ID detected. Personalised briefings will be disabled.");
+try {
+  // Vertex AI is strict about project IDs, so we check existence first
+  if (projectId && !projectId.includes('your-project')) {
+    vertexAI = new VertexAI({ project: projectId, location: region });
+  }
+} catch (e) {
+  console.warn("⚠️ Vertex AI initialization failed:", e.message);
 }
 
 // 3. BigQuery Client
@@ -64,7 +66,7 @@ try {
 // 6. Gemini AI SDK Client (Direct)
 const getGeminiClient = async () => {
   const apiKey = await getSecret('GEMINI_API_KEY');
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
+  if (!apiKey) throw new Error('GEMINI_API_KEY is not set in Secret Manager or .env');
   return new GoogleGenerativeAI(apiKey);
 };
 
