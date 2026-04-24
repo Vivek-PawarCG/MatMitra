@@ -19,6 +19,7 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--set-secrets=GEMINI_API_KEY=gemini-api-key:latest'
+      - '--set-env-vars=GOOGLE_CLOUD_PROJECT_ID=$PROJECT_ID,GOOGLE_CLOUD_REGION=europe-west1'
 
 images:
   - 'gcr.io/$PROJECT_ID/matmitra'

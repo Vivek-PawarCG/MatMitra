@@ -7,7 +7,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 // Defensive check for Project ID
-const rawProjectId = process.env.GOOGLE_CLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+const rawProjectId = process.env.GOOGLE_CLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.PROJECT_ID;
 // Ignore placeholder strings
 const projectId = (rawProjectId && !rawProjectId.includes('your-project') && !rawProjectId.includes('demo')) 
   ? rawProjectId 
@@ -20,7 +20,7 @@ const secretManager = new SecretManagerServiceClient({ projectId });
 
 async function getSecret(secretName) {
   try {
-    const parentPath = projectId ? `projects/${projectId}` : `projects/${process.env.PROJECT_NUMBER || 'current'}`;
+    const parentPath = projectId ? `projects/${projectId}` : `projects/current`;
     const [version] = await secretManager.accessSecretVersion({
       name: `${parentPath}/secrets/${secretName}/versions/latest`,
     });
@@ -31,12 +31,20 @@ async function getSecret(secretName) {
   }
 }
 
-// Clients (Auto-detecting when projectId is undefined)
-const vertexAI = new VertexAI({ project: projectId, location: region });
+// 2. Vertex AI Client - Vertex is strict, so we provide an explicit fallback
+const vertexAI = new VertexAI({ 
+  project: projectId || 'current', // 'current' is a valid alias in many GCP SDKs
+  location: region 
+});
+
+// 3. BigQuery Client
 const bigquery = new BigQuery({ projectId });
+
+// 4. Cloud Logging Client
 const logging = new Logging({ projectId });
 const log = logging.log('matmitra-app-log');
 
+// 5. Cloud Monitoring Client
 let monitoringClient;
 try {
   monitoringClient = new monitoring.MetricServiceClient({ projectId });
@@ -44,6 +52,7 @@ try {
   console.warn("⚠️ Monitoring client failed to load:", e.message);
 }
 
+// 6. Gemini AI SDK Client (Direct)
 const getGeminiClient = async () => {
   const apiKey = await getSecret('GEMINI_API_KEY');
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
