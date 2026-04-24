@@ -21,6 +21,10 @@ const { log, monitoringClient, projectId } = require('./config/google');
 
 const app = express();
 
+// --- ⚡ PERFORMANCE: Serve Static Files First ---
+// This prevents logging/rate-limiting from running on assets (.js, .css, .png)
+app.use(express.static(path.join(__dirname, 'public')));
+
 // --- ⚡ EFFICIENCY: Compression ---
 app.use(compression());
 
@@ -31,11 +35,12 @@ app.use(helmet({
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "img-src": ["'self'", "data:", "https://*"],
       "script-src": ["'self'", "'unsafe-inline'", "https://*"],
+      "connect-src": ["'self'", "https://*"],
     },
   },
 }));
-app.use(hpp()); // Prevent HTTP Parameter Pollution
-app.use(express.json({ limit: '10kb' })); // Body limit
+app.use(hpp());
+app.use(express.json({ limit: '10kb' }));
 
 // --- 🔒 SECURITY: CORS ---
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:8080'];
@@ -50,25 +55,26 @@ app.use(cors({
   credentials: true
 }));
 
-// --- 🔒 SECURITY: Rate Limiting ---
+// --- 🔒 SECURITY: Rate Limiting (API Only) ---
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
   message: { error: 'Too many requests, please try again later.' }
 });
 
 const aiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // limit each IP to 10 AI requests per minute
+  windowMs: 1 * 60 * 1000,
+  max: 10,
   message: { error: 'AI limit reached. Please wait a minute.' }
 });
 
+// Apply limiters only to /api routes
 app.use('/api/', globalLimiter);
 app.use('/api/chat', aiLimiter);
 app.use('/api/insights', aiLimiter);
 
-// 1. Structured Logging Middleware
-app.use((req, res, next) => {
+// 1. Structured Logging Middleware (API Only)
+app.use('/api', (req, res, next) => {
   const entry = log.entry({
     httpRequest: {
       requestMethod: req.method,
@@ -93,9 +99,6 @@ const analyticsRoutes = require('./routes/analytics');
 app.use('/api/chat', chatRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/analytics', analyticsRoutes);
-
-// 3. Serve Static Files
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
