@@ -1,33 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { checklistData } from '../../data/electionData';
-import { db, auth } from '../../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import './Checklist.css';
 
 export function Checklist() {
   const [checked, setChecked] = useState([]);
 
   useEffect(() => {
-    async function loadChecked() {
-      if (auth.currentUser) {
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists() && snap.data().checked) {
-          setChecked(snap.data().checked);
-        }
-      }
+    const saved = localStorage.getItem('matmitra_checklist');
+    if (saved) {
+      setChecked(JSON.parse(saved));
     }
-    loadChecked();
   }, []);
 
   async function toggle(i) {
     const newChecked = checked.includes(i) ? checked.filter(x => x !== i) : [...checked, i];
     setChecked(newChecked);
-    
-    if (auth.currentUser) {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userRef, { checked: newChecked }, { merge: true });
-    }
+    localStorage.setItem('matmitra_checklist', JSON.stringify(newChecked));
   }
 
   return (

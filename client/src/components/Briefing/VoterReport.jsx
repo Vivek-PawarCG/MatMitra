@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { db, auth } from '../../services/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import './VoterReport.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
@@ -10,23 +9,19 @@ export function VoterReport() {
   const [loading, setLoading] = useState(false);
 
   async function generate() {
-    if (!auth.currentUser) {
-        alert("Please sign in to generate your report!");
-        return;
-    }
     setLoading(true);
     try {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      const snap = await getDoc(userRef);
-      const data = snap.exists() ? snap.data() : { quizScore: 0, checked: [] };
+      const quizScore = localStorage.getItem('matmitra_quiz_score') || 0;
+      const checkedRaw = localStorage.getItem('matmitra_checklist');
+      const checked = checkedRaw ? JSON.parse(checkedRaw) : [];
 
       const res = await fetch(`${API_BASE}/insights/briefing`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userData: {
-            quizScore: data.quizScore || 0,
-            completedSteps: data.checked?.length || 0,
+            quizScore: parseInt(quizScore, 10),
+            completedSteps: checked.length,
             totalSteps: 8
           }
         })

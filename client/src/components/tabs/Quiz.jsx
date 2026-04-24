@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { quizData } from '../../data/electionData';
-import { db, auth } from '../../services/firebase';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import './Quiz.css';
 
 export function Quiz() {
@@ -12,21 +11,18 @@ export function Quiz() {
 
   async function handleDone(finalScore) {
     setDone(true);
-    if (auth.currentUser) {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      await setDoc(userRef, { quizScore: finalScore }, { merge: true });
-      
-      // Track in BigQuery
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/analytics/track`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          eventType: 'quiz_complete', 
-          userId: auth.currentUser.uid,
-          details: { score: finalScore } 
-        })
-      }).catch(console.error);
-    }
+    localStorage.setItem('matmitra_quiz_score', finalScore);
+    
+    // Track in BigQuery (Guest Mode)
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/analytics/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        eventType: 'quiz_complete', 
+        userId: 'guest',
+        details: { score: finalScore } 
+      })
+    }).catch(console.error);
   }
 
   function pick(i) {

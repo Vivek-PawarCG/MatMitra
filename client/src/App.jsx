@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Header } from './components/layout/Header';
-import { Auth } from './components/layout/Auth';
 import { Timeline } from './components/tabs/Timeline';
 import { AiSahayak } from './components/tabs/AiSahayak';
 import { Quiz } from './components/tabs/Quiz';
@@ -23,12 +22,6 @@ function App() {
 
   return (
     <div className="app-root">
-      <div className="top-nav-bar">
-        <div className="container" style={{ padding: '8px 20px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Auth />
-        </div>
-      </div>
-      
       <Header />
       
       <nav className="tab-nav">
