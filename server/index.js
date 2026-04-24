@@ -99,8 +99,8 @@ app.get('/health', (req, res) => {
   res.send('OK');
 });
 
-// 4. Wildcard handler for SPA routing (Express 5 named parameter syntax)
-app.get('/:path*', (req, res) => {
+// 4. Wildcard handler for SPA routing (Express 4 standard syntax)
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
